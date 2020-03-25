@@ -1,6 +1,13 @@
 # Pull a pre-built alpine docker image with nginx and python3 installed
 FROM python:3.7-alpine3.11
 
+RUN apk add --no-cache ca-certificates
+RUN set -ex \
+	&& apk add --no-cache --virtual .fetch-deps \
+		zsh \
+		nano \
+    python3-idle \
+    python3-tkinter
 # Set the port on which the app runs; make both values the same.
 #
 # IMPORTANT: When deploying to Azure App Service, go to the App Service on the Azure 
@@ -13,7 +20,6 @@ EXPOSE 5000
 # Indicate where env.ini lives
 ENV APP_INI env.ini
 
-
 # Set the folder where uwsgi looks for the app
 WORKDIR /app
 
@@ -24,6 +30,11 @@ COPY . /app
 # base image), generate a requirements.txt file with pip freeze and uncomment
 # the next three lines.
 COPY requirements.txt /
+
+RUN python --version
+RUN pip --version
+
 RUN pip install --no-cache-dir -U pip
 RUN pip install --no-cache-dir -r /requirements.txt
+
 ENTRYPOINT [ "python", "/app/app" ]
